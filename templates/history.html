@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation History - AI Room Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Room Dashboard</h1>
+            <nav>
+                <a href="{{ url_for('index') }}" class="nav-link">Chat</a>
+                <a href="{{ url_for('history') }}" class="nav-link active">History</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="history-container">
+                <h2>Conversation History</h2>
+                
+                {% if history %}
+                    <div class="history-list">
+                        {% for session in history %}
+                            <div class="history-session">
+                                <div class="session-header">
+                                    <h3>Session {{ loop.index }}</h3>
+                                    <span class="timestamp">{{ session.timestamp }}</span>
+                                </div>
+                                <div class="session-messages">
+                                    {% for message in session.conversation %}
+                                        <div class="message {{ message.role }}">
+                                            <div class="message-header">
+                                                <span class="role">
+                                                    {% if message.role == 'user' %}
+                                                        You
+                                                    {% else %}
+                                                        AI Assistant
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            <div class="message-content">
+                                                <p>{{ message.content }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-history">
+                        <p>No conversation history found.</p>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">Start Chatting</a>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Auto-expand message content on click
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message-content');
+            messages.forEach(message => {
+                message.addEventListener('click', function() {
+                    this.classList.toggle('expanded');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
