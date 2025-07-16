@@ -9,11 +9,19 @@
 <body>
     <div class="container">
         <header>
-            <h1>AI Room Dashboard</h1>
-            <nav>
-                <a href="{{ url_for('index') }}" class="nav-link active">Chat</a>
-                <a href="{{ url_for('history') }}" class="nav-link">History</a>
-            </nav>
+            <div class="header-content">
+                <h1>AI Room Dashboard</h1>
+                <div class="nav-and-theme">
+                    <nav>
+                        <a href="{{ url_for('index') }}" class="nav-link active">Chat</a>
+                        <a href="{{ url_for('history') }}" class="nav-link">History</a>
+                    </nav>
+                    <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                        <span class="theme-icon">🌙</span>
+                        <span class="theme-text">Dark</span>
+                    </button>
+                </div>
+            </div>
         </header>
 
         <main>
