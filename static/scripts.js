@@ -1,37 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM Content Loaded - Theme management starting...');
     
-    // Theme management
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.querySelector('.theme-icon');
-    const themeText = document.querySelector('.theme-text');
+    // Theme management variables
+    let themeToggle, themeIcon, themeText;
     
-    console.log('Theme elements found:', {
-        themeToggle: !!themeToggle,
-        themeIcon: !!themeIcon,
-        themeText: !!themeText
-    });
-    
-    // Load saved theme or default to light
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    console.log('Applying saved theme:', savedTheme);
-    applyTheme(savedTheme);
-    
-    // Theme toggle functionality
-    if (themeToggle) {
-        themeToggle.addEventListener('click', function() {
-            console.log('Theme toggle clicked');
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            console.log('Switching from', currentTheme, 'to', newTheme);
-            applyTheme(newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    }
-    
+    // Function to apply theme
     function applyTheme(theme) {
         console.log('Applying theme:', theme);
         document.documentElement.setAttribute('data-theme', theme);
+        
+        // Re-query elements to ensure they exist
+        themeIcon = document.querySelector('.theme-icon');
+        themeText = document.querySelector('.theme-text');
         
         if (themeIcon && themeText) {
             if (theme === 'dark') {
@@ -43,8 +23,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 themeText.textContent = 'Dark';
                 console.log('Updated button to show Dark mode');
             }
+        } else {
+            console.warn('Theme icon or text elements not found');
         }
     }
+    
+    // Initialize theme system
+    function initializeTheme() {
+        themeToggle = document.getElementById('theme-toggle');
+        themeIcon = document.querySelector('.theme-icon');
+        themeText = document.querySelector('.theme-text');
+        
+        console.log('Theme elements found:', {
+            themeToggle: !!themeToggle,
+            themeIcon: !!themeIcon,
+            themeText: !!themeText
+        });
+        
+        // Load saved theme or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        console.log('Applying saved theme:', savedTheme);
+        applyTheme(savedTheme);
+        
+        // Theme toggle functionality
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                console.log('Theme toggle clicked');
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                console.log('Switching from', currentTheme, 'to', newTheme);
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            console.log('Theme toggle event listener added');
+        } else {
+            console.warn('Theme toggle button not found');
+        }
+    }
+    
+    // Initialize theme system
+    initializeTheme();
     
     // Chat-specific functionality
     const messageInput = document.getElementById('message-input');
@@ -66,8 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeHistoryFunctionality();
     }
     
-    function initializeChatFunctionality() {
-
     function initializeChatFunctionality() {
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
