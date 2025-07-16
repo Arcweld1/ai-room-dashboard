@@ -1,4 +1,52 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Theme management starting...');
+    
+    // Theme management
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.querySelector('.theme-icon');
+    const themeText = document.querySelector('.theme-text');
+    
+    console.log('Theme elements found:', {
+        themeToggle: !!themeToggle,
+        themeIcon: !!themeIcon,
+        themeText: !!themeText
+    });
+    
+    // Load saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    console.log('Applying saved theme:', savedTheme);
+    applyTheme(savedTheme);
+    
+    // Theme toggle functionality
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            console.log('Theme toggle clicked');
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            console.log('Switching from', currentTheme, 'to', newTheme);
+            applyTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+    
+    function applyTheme(theme) {
+        console.log('Applying theme:', theme);
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        if (themeIcon && themeText) {
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+                console.log('Updated button to show Light mode');
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+                console.log('Updated button to show Dark mode');
+            }
+        }
+    }
+    
+    // Chat-specific functionality
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
     const clearBtn = document.getElementById('clear-btn');
@@ -8,28 +56,78 @@ document.addEventListener('DOMContentLoaded', function() {
     const loading = document.getElementById('loading');
     const notification = document.getElementById('notification');
 
-    // Auto-resize textarea
-    messageInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
-    });
+    // Only initialize chat functionality if we're on the chat page
+    if (messageInput && sendBtn && chatMessages) {
+        initializeChatFunctionality();
+    }
+    
+    // Only initialize history functionality if we're on the history page
+    if (document.querySelector('.history-container')) {
+        initializeHistoryFunctionality();
+    }
+    
+    function initializeChatFunctionality() {
 
-    // Send message on Enter (but not Shift+Enter)
-    messageInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
+    function initializeChatFunctionality() {
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Send message on Enter (but not Shift+Enter)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send button click
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Clear conversation
+        clearBtn.addEventListener('click', clearConversation);
+
+        // File upload
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // AI provider change handler
+        aiProvider.addEventListener('change', function() {
+            const providerName = this.options[this.selectedIndex].text;
+            showNotification(`Switched to ${providerName}`, 'info');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to send message
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                sendMessage();
+            }
+            
+            // Escape to clear input
+            if (e.key === 'Escape') {
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                messageInput.blur();
+            }
+        });
+
+        // Initialize
+        messageInput.focus();
+        
+        // Show welcome message based on available APIs
+        checkAPIStatus();
+        
+        function checkAPIStatus() {
+            // This could be enhanced to check API key validity
+            const currentProvider = aiProvider.value;
+            const providerName = aiProvider.options[aiProvider.selectedIndex].text;
+            
+            // You could add a health check endpoint to verify API keys
+            console.log(`Using ${providerName} as AI provider`);
         }
-    });
-
-    // Send button click
-    sendBtn.addEventListener('click', sendMessage);
-
-    // Clear conversation
-    clearBtn.addEventListener('click', clearConversation);
-
-    // File upload
-    fileInput.addEventListener('change', handleFileUpload);
+    }
 
     function sendMessage() {
         const message = messageInput.value.trim();
@@ -195,39 +293,13 @@ document.addEventListener('DOMContentLoaded', function() {
         showNotification(`Switched to ${providerName}`, 'info');
     });
 
-    // Handle streaming responses (future enhancement)
-    function handleStreamedResponse(response) {
-        // This would be implemented for real-time streaming
-        // Currently, responses are sent as complete messages
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + Enter to send message
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-            sendMessage();
-        }
-        
-        // Escape to clear input
-        if (e.key === 'Escape') {
-            messageInput.value = '';
-            messageInput.style.height = 'auto';
-            messageInput.blur();
-        }
-    });
-
-    // Initialize
-    messageInput.focus();
-    
-    // Show welcome message based on available APIs
-    checkAPIStatus();
-    
-    function checkAPIStatus() {
-        // This could be enhanced to check API key validity
-        const currentProvider = aiProvider.value;
-        const providerName = aiProvider.options[aiProvider.selectedIndex].text;
-        
-        // You could add a health check endpoint to verify API keys
-        console.log(`Using ${providerName} as AI provider`);
+    function initializeHistoryFunctionality() {
+        // Auto-expand message content on click
+        const messages = document.querySelectorAll('.message-content');
+        messages.forEach(message => {
+            message.addEventListener('click', function() {
+                this.classList.toggle('expanded');
+            });
+        });
     }
 });
