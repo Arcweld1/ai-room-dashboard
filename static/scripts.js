@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading
         showLoading();
         
-        // Send to backend
+        // Send to backend with improved error handling
         fetch('/chat', {
             method: 'POST',
             headers: {
@@ -56,7 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 ai_provider: aiProvider.value
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
             hideLoading();
             
@@ -70,7 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             hideLoading();
             console.error('Error:', error);
-            showNotification('Network error occurred', 'error');
+            if (error.message.includes('HTTP 500')) {
+                showNotification('Server error - please check API keys', 'error');
+            } else {
+                showNotification('Network error occurred', 'error');
+            }
         });
     }
 
@@ -82,16 +91,29 @@ document.addEventListener('DOMContentLoaded', function() {
         messageHeader.className = 'message-header';
         
         let headerText = '';
+        const timestamp = new Date().toLocaleTimeString();
+        
         if (role === 'user') {
-            headerText = 'You';
+            headerText = `You • ${timestamp}`;
         } else if (role === 'assistant') {
-            headerText = provider ? `${provider} Assistant` : 'AI Assistant';
+            headerText = `${provider ? provider : 'AI'} Assistant • ${timestamp}`;
         }
         
         messageHeader.innerHTML = `<span class="role">${headerText}</span>`;
         
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
+        
+        // Add copy button for assistant messages
+        if (role === 'assistant') {
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.innerHTML = '📋';
+            copyBtn.title = 'Copy message';
+            copyBtn.onclick = () => copyToClipboard(content);
+            messageHeader.appendChild(copyBtn);
+        }
+        
         messageContent.innerHTML = `<p>${formatMessage(content)}</p>`;
         
         messageDiv.appendChild(messageHeader);
@@ -101,11 +123,26 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        return messageDiv;
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('Message copied to clipboard', 'success');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            showNotification('Failed to copy message', 'error');
+        });
     }
 
     function formatMessage(message) {
-        // Basic formatting - convert newlines to <br>
-        return message.replace(/\n/g, '<br>');
+        // Enhanced formatting - convert newlines to <br> and handle markdown-like formatting
+        return message
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>');
     }
 
     function clearConversation() {
@@ -156,7 +193,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('File uploaded: ' + data.filename, 'success');
                 
                 // Add file upload message to chat
-                addMessage('user', `📎 Uploaded file: ${data.filename}`);
+                const uploadMessage = `📎 Uploaded file: ${file.name}`;
+                if (data.content_preview) {
+                    addMessage('user', uploadMessage + '\n\nContent preview:\n' + data.content_preview);
+                } else {
+                    addMessage('user', uploadMessage);
+                }
             }
         })
         .catch(error => {
@@ -223,11 +265,51 @@ document.addEventListener('DOMContentLoaded', function() {
     checkAPIStatus();
     
     function checkAPIStatus() {
-        // This could be enhanced to check API key validity
-        const currentProvider = aiProvider.value;
-        const providerName = aiProvider.options[aiProvider.selectedIndex].text;
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                const { apis } = data;
+                
+                // Update UI based on API availability
+                if (!apis.openai && !apis.gemini) {
+                    showNotification('⚠️ No API keys configured. Please check your settings.', 'error');
+                } else {
+                    const available = [];
+                    if (apis.openai) available.push('OpenAI');
+                    if (apis.gemini) available.push('Gemini');
+                    
+                    // Filter AI provider options based on availability
+                    updateAIProviderOptions(apis);
+                    
+                    console.log(`Available APIs: ${available.join(', ')}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking API status:', error);
+            });
+    }
+    
+    function updateAIProviderOptions(apis) {
+        const select = document.getElementById('ai-provider');
+        const options = select.options;
         
-        // You could add a health check endpoint to verify API keys
-        console.log(`Using ${providerName} as AI provider`);
+        // Disable unavailable options
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            if (option.value === 'openai' && !apis.openai) {
+                option.disabled = true;
+                option.text = 'OpenAI (GPT-3.5) - API Key Required';
+            } else if (option.value === 'gemini' && !apis.gemini) {
+                option.disabled = true;
+                option.text = 'Google Gemini - API Key Required';
+            }
+        }
+        
+        // Select first available option
+        if (!apis.openai && apis.gemini) {
+            select.value = 'gemini';
+        } else if (apis.openai && !apis.gemini) {
+            select.value = 'openai';
+        }
     }
 });

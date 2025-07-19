@@ -5,12 +5,15 @@ A Flask-based web application for multi-AI chat interactions with support for Op
 ## Features
 
 - **Multi-AI Support**: Switch between OpenAI GPT-3.5 and Google Gemini
-- **Real-time Chat**: Interactive chat interface with streaming responses
-- **File Uploads**: Support for various file types (images, documents, text files)
-- **Conversation History**: Persistent storage and viewing of chat sessions
-- **Responsive Design**: Mobile-friendly interface
+- **Real-time Chat**: Interactive chat interface with enhanced error handling
+- **File Uploads**: Support for various file types (images, documents, text files) with content processing
+- **Conversation History**: Persistent storage and viewing of chat sessions with timestamps
+- **Responsive Design**: Mobile-friendly interface with improved UI/UX
 - **Docker Support**: Easy containerized deployment
-- **Security**: Environment variable management for API keys
+- **Security**: Environment variable management for API keys with validation
+- **Enhanced Error Handling**: Better user feedback and API key validation
+- **Copy Functionality**: Easy copying of AI responses
+- **File Processing**: Automatic content extraction and integration with AI conversations
 
 ## Quick Start
 
@@ -102,9 +105,11 @@ A Flask-based web application for multi-AI chat interactions with support for Op
 - `GET /` - Main chat interface
 - `GET /history` - Conversation history
 - `POST /chat` - Send chat message
-- `POST /upload` - Upload file
+- `POST /chat/stream` - Streaming chat endpoint (future enhancement)
+- `POST /upload` - Upload file with content processing
 - `POST /clear_conversation` - Clear current conversation
-- `GET /health` - Health check endpoint
+- `GET /health` - Enhanced health check endpoint with API status
+- `GET /api/status` - Check API key validation status
 
 ## Project Structure
 
@@ -168,9 +173,21 @@ Application logs are written to:
 
 ### Testing
 
+Run the comprehensive test suite:
+```bash
+python test_improvements.py
+```
+
+For development testing:
+```bash
+pip install -r requirements-test.txt
+pytest tests/  # When unit tests are added
+```
+
 Basic health check:
 ```bash
 curl http://localhost:5000/health
+curl http://localhost:5000/api/status
 ```
 
 ## Security Notes
@@ -211,11 +228,16 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Roadmap
 
-- [ ] Real-time streaming responses
+- [x] Enhanced error handling and validation
+- [x] File content processing and integration
+- [x] Improved UI/UX with timestamps and copy functionality
+- [x] API key validation and status checking
+- [x] Comprehensive testing suite
+- [ ] Real-time streaming responses (SSE implementation)
 - [ ] Multiple conversation rooms
 - [ ] User authentication
 - [ ] Cloud storage integration
-- [ ] Advanced file processing
+- [ ] Advanced file processing (PDF, images, documents)
 - [ ] Rate limiting and quotas
 - [ ] WebSocket support
 - [ ] Plugin system for additional AI providers

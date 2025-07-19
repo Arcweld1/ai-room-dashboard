@@ -129,6 +129,9 @@ data/*.log
 data/*.json
 data/*.txt
 
+# Test files
+test_*.py.backup
+
 # Keep .gitkeep files
 !data/.gitkeep
 !uploads/.gitkeep

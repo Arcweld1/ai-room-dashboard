@@ -103,6 +103,11 @@ main {
     font-size: 0.9rem;
 }
 
+.ai-selector select option:disabled {
+    color: #999;
+    font-style: italic;
+}
+
 /* Chat messages */
 .chat-messages {
     flex: 1;
@@ -139,6 +144,14 @@ main {
     line-height: 1.5;
 }
 
+.message-content code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
 .message.user .message-content {
     background: #3498db;
     color: white;
@@ -163,6 +176,25 @@ main {
     color: #666;
     margin-bottom: 0.2rem;
     padding: 0 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    padding: 0.2rem;
+    border-radius: 2px;
+    transition: opacity 0.3s ease;
+}
+
+.copy-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .message.user .message-header {
