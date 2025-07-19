@@ -1,0 +1,6 @@
+# Testing Requirements (additional to main requirements.txt)
+# These are only needed for running tests
+
+requests>=2.31.0
+pytest>=7.0.0
+pytest-cov>=4.0.0
